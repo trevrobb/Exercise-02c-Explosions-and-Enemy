@@ -50,6 +50,11 @@ func damage(d):
 			yield(explosion, "animation_finished")
 		queue_free()
   ```
+  
+In the res://Player/Player.tscn scene:
+  - Add an Area2D node as child of Player
+  - Add a CollisionPolygon2D as a child of Area2D. In the Viewport, add points of the polygon until you have a shape slightly larger than the sprite.
+  - Attach a `body_entered(body)` Signal to the Area2D node (it should connect back to res://Player/Player.gd). If any body (other than body.name == "Player") enters the Area2D, it should generate 100 damage to the player.
 
 Asteroid_Small:
   - Create a new scene (you will ultimately save it as res://Asteroid/Asteroid_Small.tscn). Make it identical to res://Asteroid/Asteroid.tscn, except use the res://Assets/Asteroid_Small.png texture for the sprite (with a corresponding CollisionPolygon2D)
