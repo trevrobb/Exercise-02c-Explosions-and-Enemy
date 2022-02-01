@@ -168,6 +168,23 @@ func _physics_process(_delta):
   ```
   - The Enemy should have a damage function, similar to the small asteroid
 
+In res://Game.tscn
+  - As a child of the Game node, add a Node2D. Rename it Enemy_Container. As a child of Enemy_Container, Add Child Instance: res://Enemy/Enemy.tscn
+  - Right-click on the Player node. Choose "Save Branch as Scene": res://Player/Player.tscn. Delete the Player node and all of its children
+  - As a child of the Game node, add a Node2D. Rename it Player_Container. Add a script to Player_Container: res://Player/Player_Container.gd
+  - The contents of res://Player/Player_Container.gd should be as follows:
+  ```
+extends Node2D
+
+onready var Player = load("res://Player/Player.tscn")
+
+func _physics_process(_delta):
+	if get_child_count() == 0:
+		var player = Player.instance()
+		player.position = Vector2(512,300)
+		add_child(player)
+  ```
+
 
 Test it and make sure this is working correctly. You should see an enemy ship oscillate across the screen, shooting at the player every two seconds. The bullets should now break up the big asteroids into smaller ones, and the smaller asteroids and the enemy should be killed by the bullets. There should be explosions everywhere. If the player is hit, the ship should blow up.
 
