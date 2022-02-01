@@ -186,7 +186,7 @@ func _physics_process(_delta):
   ```
 
 
-Test it and make sure this is working correctly. You should see an enemy ship oscillate across the screen, shooting at the player every two seconds. The bullets should now break up the big asteroids into smaller ones, and the smaller asteroids and the enemy should be killed by the bullets. There should be explosions everywhere. If the player is hit, the ship should blow up.
+Test it and make sure this is working correctly. You should see an enemy ship oscillate across the screen, shooting at the player every two seconds. The bullets should now break up the big asteroids into smaller ones, and the smaller asteroids and the enemy should be killed by the bullets. There should be explosions everywhere. If the player is hit, the ship should blow up and then respawn.
 
 Quit Godot. In GitHub desktop, you should now see the updated files listed in the left panel. In the bottom of that panel, type a Summary message (something like "Completes the exercise") and press the "Commit to master" button. On the right side of the top, black panel, you should see a button labeled "Push origin". Press that now.
 
