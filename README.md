@@ -8,30 +8,18 @@ Press the green "Code" button and select "Open in GitHub Desktop". Allow the bro
 
 Open Godot. In the Project Manager, tap the "Import" button. Tap "Browse" and navigate to the repository folder. Select the project.godot file and tap "Open".
 
-You will now see where we left off in Exercise-02b: .
+You will now see where we left off in Exercise-02b: Your ship and three asteroids should occupy the playing area. The ship should be able to maneuver and shoot.
 
 This is what you will need to accomplish as part of this exercise:
 
-Asteroid Explosion:
-  - Create a new Explosion_Asteroid scene. The root of the scene should be an AnimatedSprite node named Explosion_Asteroid. In the Inspector Panel->Frames, select new SpriteFrames, and then edit the new SpriteFrames. In the AnimationFrames section of the bottom panel, choose Add Frames from a Sprite Sheet. Select all 64 frames from res://Assets/Explosion_Asteroid.png (8 horizontal and 8 vertical). Set the speed to 100 FPS and make sure Loop is off. Back in the Inspector, set the Offset to (0,-30).
-  - Add a script to the Explosion_Asteroid node. In the `_ready()` callback, play the "default" animation. Give it a random rotation. Give it a random scale (between 0.7 and 1.5) and a random speed_scale (between 0.8 and 2.0)
-  - Add an `animation_finished` signal to the Explosion_Asteroid node. When the animation has completed, it should `queue_free()`
-  - Save the scene as res://Effects/Explosion_Asteroid.tscn
-
-Bullet Explosion:
-  - Create a new Explosion_Bullet scene. The root of the scene should be an AnimatedSprite node named Explosion_Bullet. In the Inspector Panel->Frames, select new SpriteFrames, and then edit the new SpriteFrames. In the AnimationFrames section of the bottom panel, choose Add Frames from a Sprite Sheet. Select all 64 frames from res://Assets/Explosion_Bullet.png (8 horizontal and 8 vertical). Set the speed to 100 FPS and make sure Loop is off.
-  - Add a script to the Explosion_Bullet node. In the `_ready()` callback, play the "default" animation
-  - Add an `animation_finished` signal to the Explosion_Bullet node. When the animation has completed, it should `queue_free()`
-  - Save the scene as res://Effects/Explosion_Bullet.tscn
-
-Ship Explosion:
-   - Create a new Explosion_Ship scene. The root of the scene should be an AnimatedSprite node named Explosion_Ship. In the Inspector Panel->Frames, select new SpriteFrames, and then edit the new SpriteFrames. In the AnimationFrames section of the bottom panel, choose Add Frames from a Sprite Sheet. Select all 64 frames from res://Assets/Explosion_Ship.png (8 horizontal and 8 vertical). Set the speed to 100 FPS and make sure Loop is off.
-  - Add a script to the Explosion_Ship node. In the `_ready()` callback, play the "default" animation. Give it a random rotation.
+Explosion:
+  - Create a new Explosion scene. The root of the scene should be an AnimatedSprite node named Explosion. In the Inspector Panel->Frames, select new SpriteFrames, and then edit the new SpriteFrames. In the AnimationFrames section of the bottom panel, choose Add Frames from a Sprite Sheet. Select all 64 frames from res://Assets/Explosion.png (8 horizontal and 8 vertical). Set the speed to 100 FPS and make sure Loop is off. Back in the Inspector, set the Offset to (0,-30).
+  - Add a script to the Explosion node. In the `_ready()` callback, play the "default" animation
   - Add an `animation_finished` signal to the Explosion node. When the animation has completed, it should `queue_free()`
-  - Save the scene as res://Effects/Explosion_Ship.tscn
+  - Save the scene as res://Effects/Explosion.tscn
 
 In res://Player/Bullet.gd
-  - Create variables for Effects (which can be initialized to null) and Explosion. Load the res://Effects/Explosion_Bullet.tscn scene into the Explosion variable
+  - Create variables for Effects (which can be initialized to null) and Explosion. Load the res://Effects/Explosion.tscn scene into the Explosion variable
   - Update the `_on_Area2d_Body_Entered(body)` callback to the following:
   ```
   func _on_Area2D_body_entered(body):
@@ -45,8 +33,8 @@ In res://Player/Bullet.gd
 	queue_free()
   ```
 
-in res://Player/Player.gd
-  - Create a variable for Explosion_Ship. Load the res://Effects/Explosion_Ship.tscn scene into the Explosion_Ship variable
+In res://Player/Player.gd
+  - Create a variable for Explosion. Load the res://Effects/Explosion.tscn scene into the Explosion variable
   - Create a variable health. Initialize health to 10
   - Create a new function called damage (it should accept a parameter d):
   ```
@@ -55,7 +43,7 @@ func damage(d):
 	if health <= 0:
 		Effects = get_node_or_null("/root/Game/Effects")
 		if Effects != null:
-			var explosion = Explosion_Ship.instance()
+			var explosion = Explosion.instance()
 			Effects.add_child(explosion)
 			explosion.global_position = global_position
 			hide()
@@ -98,6 +86,7 @@ Now, we should edit res://Asteroid/Asteroid.gd:
   ```
 onready var Asteroid_small = load("res://Asteroid/Asteroid_small.tscn")
 var small_asteroids = [Vector2(0, -30), Vector2(30,30), Vector2(-30,30)]
+var health = 1
   ```
   - Now, add a new `damage(d)` function:
   ```
@@ -117,15 +106,71 @@ func damage(d):
 		queue_free()
   ```
 
+Next, we need a bullet for the enemy to shoot:
+  - Create a scene, indentical (for now) to the res://Player/Bullet.tscn, but save it in res://Enemy/Bullet.tscn. It should have a separate script: res://Enemy/Bullet.gd
+
+Finally, we need to create the enemy:
+  - Create a new KinematicBody2D scene. Name the root node Enemy
+  - Add a Sprite child node. Its texture should be res://Assets/Enemy.png
+  - Create a CollisionPolygon2D Sibling for the Sprite
+  - Add a Timer child node to Enemy, set the Wait Time to 2.0 and set Autostart to on
+  - Add an Area2D child node to Enemy. As a child of the Area2D node, add a CollisionShape2D (CircleShape2D) with a radius of 40.
+  - Add a script (res://Enemy/Enemy.gd) to the Enemy node
+  - Attach a `timeout()` Signal to the Timer. The resulting callback (in Enemy.gd) should be as follows:
+  ```
+func _on_Timer_timeout():
+  var Player = get_node_or_null("/root/Game/Player_Container/Player")
+  var Effects = get_node_or_null("/root/Game/Effects")
+  if Player != null and Effects != null:
+    var bullet = Bullet.instance()
+    var d = global_position.angle_to_point(Player.global_position) - PI/2
+    bullet.rotation = d
+    bullet.position = global_position + Vector2(0, -40).rotated(d)
+    Effects.add_child(bullet)
+  ```
+  - Then Attach a `body_entered(body)` Signal to the Area2D node. The resultinc callback (in Enemy.gd) should be as follows:
+  ```
+  func _on_Area2D_body_entered(body):
+	if body.name == "Player":
+		body.damage(100)
+		damage(100)
+  ```
+  - The variables for the Enemy should be as follows:
+  ```
+var y_positions = [100,150,200,500,550]
+var initial_position = Vector2.ZERO
+var direction = Vector2(1.5,0)
+var wobble = 30.0
+
+var health = 1
+
+var Effects = null
+onready var Bullet = load("res://Enemy/Bullet.tscn")
+onready var Explosion = load("res://Effects/Explosion.tscn")
+  ```
+  - The `_ready()` and `_physics_process(_delta)` callbacks should be as follows:
+  ```
+func _ready():
+	initial_position.x = -100
+  initial_position.y = y_positions[randi() % y_positions.size()]
+	position = initial_position
+
+func _physics_process(_delta):
+	position += direction
+	position.y = initial_position.y + sin(position.x/20)*wobble
+	if position.x > 1200:
+		queue_free()
+  ```
+  - The Enemy should have a damage function, similar to the small asteroid
 
 
-Test it and make sure this is working correctly. 
+Test it and make sure this is working correctly. You should see an enemy ship oscillate across the screen, shooting at the player every two seconds. The bullets should now break up the big asteroids into smaller ones, and the smaller asteroids and the enemy should be killed by the bullets. There should be explosions everywhere. If the player is hit, the ship should blow up.
 
-Quit Godot. In GitHub desktop, you should now see the updated files listed in the left panel. In the bottom of that panel, type a Summary message (something like "Completes the mouse and keyboard exercise") and press the "Commit to master" button. On the right side of the top, black panel, you should see a button labeled "Push origin". Press that now.
+Quit Godot. In GitHub desktop, you should now see the updated files listed in the left panel. In the bottom of that panel, type a Summary message (something like "Completes the exercise") and press the "Commit to master" button. On the right side of the top, black panel, you should see a button labeled "Push origin". Press that now.
 
-If you return to and refresh your GitHub repository page, you should now see your updated files with the time when they were changed.
+If you return to and refresh your GitHub repository page, you should now see your updated files with an indication of when they were changed.
 
-Now edit the README.md file. When you have finished editing, commit your changes, and then turn in the URL of the main repository page (`https://github.com/[username]/Exercise-Bullets-and-Asteroids`) on Canvas.
+Now edit the README.md file. When you have finished editing, commit your changes, and then turn in the URL of the main repository page (`https://github.com/[username]/Exercise-Explosions-and-Enemy`) on Canvas.
 
 The final state of the file should be as follows (replacing my information with yours):
 ```
@@ -133,7 +178,7 @@ The final state of the file should be as follows (replacing my information with 
 
 Exercise for MSCH-C220
 
-A user-controlled ship for a space-shooter game. Recently added the ability to shoot at asteroids. Created in Godot.
+A user-controlled ship in a space-shooter game. Explosions! Asteroids! Smaller asteroids! An alien ship!. Created in Godot.
 
 ## Implementation
 
@@ -141,11 +186,13 @@ Created using [Godot 3.4.2](https://godotengine.org/download)
 
 Assets are provided by [Kenney.nl](https://kenney.nl/assets/space-shooter-extension), provided under a [CC0 1.0 Public Domain License](https://creativecommons.org/publicdomain/zero/1.0/).
 
+The explosion spritesheet was released into the public domain by [StumpyStrust](https://opengameart.org/content/explosion-sheet)
+
 ## References
 None
 
 ## Future Development
-None
+Score, lives, game-start and game-end screens. In-game menu.
 
 ## Created by
 Jason Francis
