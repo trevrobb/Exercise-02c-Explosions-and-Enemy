@@ -8,7 +8,7 @@ Press the green "Code" button and select "Open in GitHub Desktop". Allow the bro
 
 Open Godot. In the Project Manager, tap the "Import" button. Tap "Browse" and navigate to the repository folder. Select the project.godot file and tap "Open".
 
-You will now see where we left off in Exercise-02b: Your ship and three asteroids should occupy the playing area. The ship should be able to maneuver and shoot.
+You will now see where we left off in Exercise-02b: Your ship and two asteroids should occupy the playing area. The ship should be able to maneuver and shoot.
 
 This is what you will need to accomplish as part of this exercise:
 
